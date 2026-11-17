@@ -3,7 +3,9 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FailedLoginController;
+use App\Http\Controllers\InventoryReportController;
 use App\Http\Controllers\LoginLogController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StaffController;
 use Illuminate\Support\Facades\Route;
@@ -54,4 +56,17 @@ Route::middleware(['auth', 'active', 'password.changed'])->group(function () {
         Route::get('reports/failed-logins', [FailedLoginController::class, 'index'])
             ->name('reports.failed-logins');
     });
+
+    // Module 2 — Hardware Product & Inventory Management
+    // Owner only: add, edit, restock, archive, delete, and the inventory report.
+    Route::middleware('role:OWNER')->group(function () {
+        Route::get('products/report', InventoryReportController::class)->name('products.report');
+        Route::resource('products', ProductController::class)->except(['index', 'show']);
+        Route::patch('products/{product}/stock', [ProductController::class, 'addStock'])
+            ->name('products.add-stock');
+        Route::patch('products/{product}/status', [ProductController::class, 'toggleStatus'])
+            ->name('products.toggle-status');
+    });
+    // Owner and Cashier: the catalog. Cashiers get a read-only view without cost prices.
+    Route::get('products', [ProductController::class, 'index'])->name('products.index');
 });

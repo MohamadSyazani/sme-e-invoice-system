@@ -44,7 +44,13 @@
                         </li>
                     @endif
 
-                    {{-- Other modules: add your nav links here (Products, Customers, POS, Ledger...). --}}
+                    {{-- Module 2 — every role (Cashier gets the read-only catalog) --}}
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}"
+                           href="{{ route('products.index') }}">Products</a>
+                    </li>
+
+                    {{-- Other modules: add your nav links here (Customers, POS, Ledger...). --}}
                     @stack('nav-links')
                 </ul>
 
