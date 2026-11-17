@@ -46,23 +46,29 @@
             <div class="form-text">Owner sees everything. Cashier only gets POS, the customer list and retail prices.</div>
         </div>
 
-        <div class="col-md-6">
-            <label for="status" class="form-label">Status</label>
-            @if ($editingSelf)
-                <input type="hidden" name="status" value="{{ $staff->status }}">
-                <select id="status" class="form-select" disabled>
-                    <option>{{ $staff->status }}</option>
-                </select>
-            @else
-                <select id="status" name="status" class="form-select @error('status') is-invalid @enderror" required>
-                    @foreach (\App\Models\User::STATUSES as $status)
-                        <option value="{{ $status }}" @selected($currentStatus === $status)>{{ ucfirst(strtolower($status)) }}</option>
-                    @endforeach
-                </select>
-            @endif
-            @error('status') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
-            <div class="form-text">Inactive staff cannot log in.</div>
-        </div>
+        @if ($staff)
+            <div class="col-md-6">
+                <label for="status" class="form-label">Status</label>
+                @if ($editingSelf)
+                    <input type="hidden" name="status" value="{{ $staff->status }}">
+                    <select id="status" class="form-select" disabled>
+                        <option>{{ $staff->status }}</option>
+                    </select>
+                @else
+                    <select id="status" name="status" class="form-select @error('status') is-invalid @enderror" required>
+                        @foreach (\App\Models\User::STATUSES as $status)
+                            <option value="{{ $status }}" @selected($currentStatus === $status)>{{ ucfirst(strtolower($status)) }}</option>
+                        @endforeach
+                    </select>
+                @endif
+                @error('status') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                <div class="form-text">Inactive staff cannot log in.</div>
+            </div>
+        @else
+            <div class="col-md-6 d-flex align-items-end">
+                <div class="form-text mb-2">New accounts are activated automatically.</div>
+            </div>
+        @endif
 
         @if ($editingSelf)
             <div class="col-12">

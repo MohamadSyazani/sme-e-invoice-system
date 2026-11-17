@@ -44,9 +44,12 @@ class StaffController extends Controller
 
     public function store(StoreStaffRequest $request): RedirectResponse
     {
+        // Account state and audit timestamps are system-managed on registration.
         // The password is hashed automatically by the User model's 'hashed' cast.
-        // The Owner chose this password, so the staff member must replace it on first login.
-        $user = User::create($request->validated() + ['must_change_password' => true]);
+        $user = User::create($request->validated() + [
+            'status' => User::STATUS_ACTIVE,
+            'must_change_password' => false,
+        ]);
 
         return redirect()->route('staff.index')
             ->with('success', "Staff account for {$user->name} was created.");

@@ -24,7 +24,6 @@ class StoreStaffRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'max:50', 'unique:users,username'],
             'role' => ['required', Rule::in(User::ROLES)],
-            'status' => ['required', Rule::in(User::STATUSES)],
             'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()],
         ];
     }
