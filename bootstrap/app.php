@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Middleware\EnsurePasswordIsChanged;
+use App\Http\Middleware\EnsureUserHasRole;
+use App\Http\Middleware\EnsureUserIsActive;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -12,7 +15,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Module 1: RBAC + account-state middleware aliases.
+        $middleware->alias([
+            'role' => EnsureUserHasRole::class,
+            'active' => EnsureUserIsActive::class,
+            'password.changed' => EnsurePasswordIsChanged::class,
+        ]);
+
+        // Already-logged-in users who open /login are sent to the dashboard.
+        $middleware->redirectUsersTo(fn () => route('dashboard'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
