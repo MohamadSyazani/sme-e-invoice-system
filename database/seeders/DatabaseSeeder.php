@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,      // Module 1
+            ProductSeeder::class,   // Module 2
             // Module 3 adds its Walk-In Customer (ID = 1) seeder here.
         ]);
     }
