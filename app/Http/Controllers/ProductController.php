@@ -19,7 +19,7 @@ class ProductController extends Controller
 {
     /** Columns a Cashier is allowed to load. supplier_cost_price is deliberately missing. */
     private const CASHIER_COLUMNS = [
-        'id', 'sku', 'name', 'category', 'unit_type',
+        'id', 'sku', 'name', 'category', 'unit_type', 'image_path',
         'retail_selling_price', 'stock_quantity', 'low_stock_threshold', 'status',
     ];
 
@@ -56,9 +56,11 @@ class ProductController extends Controller
 
     public function store(StoreProductRequest $request): RedirectResponse
     {
-        $product = Product::create($request->validated() + [
+        $product = Product::create($request->productData() + [
             'lhdn_class_code' => Product::LHDN_CLASS_CODE, // physical hardware is always 022
             'status' => Product::STATUS_ACTIVE,
+            // Saved on the public disk as products/<random name>.jpg
+            'image_path' => $request->file('image')?->store('products', 'public'),
         ]);
 
         return redirect()->route('products.index')
@@ -75,7 +77,18 @@ class ProductController extends Controller
 
     public function update(UpdateProductRequest $request, Product $product): RedirectResponse
     {
-        $product->update($request->validated());
+        $data = $request->productData();
+
+        if ($request->hasFile('image')) {
+            // A new photo replaces the old one.
+            $product->deleteImageFile();
+            $data['image_path'] = $request->file('image')->store('products', 'public');
+        } elseif ($request->boolean('remove_image')) {
+            $product->deleteImageFile();
+            $data['image_path'] = null;
+        }
+
+        $product->update($data);
 
         return redirect()->route('products.index')
             ->with('success', "{$product->name} was updated.");

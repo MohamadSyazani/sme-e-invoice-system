@@ -6,6 +6,7 @@ use App\Http\Controllers\FailedLoginController;
 use App\Http\Controllers\InventoryReportController;
 use App\Http\Controllers\LoginLogController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductScanController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StaffController;
 use Illuminate\Support\Facades\Route;
@@ -58,9 +59,13 @@ Route::middleware(['auth', 'active', 'password.changed'])->group(function () {
     });
 
     // Module 2 — Hardware Product & Inventory Management
-    // Owner only: add, edit, restock, archive, delete, and the inventory report.
+    // Owner only: add, edit, restock, archive, delete, AI photo scan, and the inventory report.
     Route::middleware('role:OWNER')->group(function () {
         Route::get('products/report', InventoryReportController::class)->name('products.report');
+        // AI Photo Scanner. Limited to 10 scans a minute per user to protect the Gemini quota.
+        Route::post('products/scan', ProductScanController::class)
+            ->middleware('throttle:10,1')
+            ->name('products.scan');
         Route::resource('products', ProductController::class)->except(['index', 'show']);
         Route::patch('products/{product}/stock', [ProductController::class, 'addStock'])
             ->name('products.add-stock');

@@ -94,7 +94,15 @@
                     @forelse ($products as $product)
                         <tr @class(['table-secondary' => ! $product->isActive()])>
                             <td class="text-nowrap"><code>{{ $product->sku }}</code></td>
-                            <td>{{ $product->name }}</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    @if ($photo = $product->imageUrl())
+                                        <img src="{{ $photo }}" alt="" class="rounded border flex-shrink-0"
+                                             style="width: 40px; height: 40px; object-fit: cover;">
+                                    @endif
+                                    <span>{{ $product->name }}</span>
+                                </div>
+                            </td>
                             <td class="text-muted small">{{ $product->category ?? '-' }}</td>
                             <td class="text-end text-nowrap">
                                 {{ number_format($product->stock_quantity) }}
