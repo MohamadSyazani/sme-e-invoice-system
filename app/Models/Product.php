@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Module 2: Hardware Product & Inventory Management.
@@ -102,6 +103,29 @@ class Product extends Model
     }
 
     /**
+     * Web address of the product photo, or null when there is no photo
+     * (or the file is not on this computer: photos are stored on the machine
+     * that uploaded them, not in the shared database).
+     */
+    public function imageUrl(): ?string
+    {
+        if (blank($this->image_path) || ! Storage::disk('public')->exists($this->image_path)) {
+            return null;
+        }
+
+        // asset() uses the address the page was opened with, so it also works from a phone.
+        return asset('storage/'.$this->image_path);
+    }
+
+    /** Remove the photo file from disk (the caller decides what happens to image_path). */
+    public function deleteImageFile(): void
+    {
+        if (filled($this->image_path)) {
+            Storage::disk('public')->delete($this->image_path);
+        }
+    }
+
+    /**
      * Soft-Archive Rule: has this product appeared on any past invoice?
      * Uses the query builder so Module 2 does not depend on Module 4's model class,
      * and returns false until Module 4's transaction_items table exists.
@@ -129,6 +153,7 @@ class Product extends Model
             return 'ARCHIVED';
         }
 
+        $this->deleteImageFile(); // the photo is only removed when the product is really deleted
         $this->delete();
 
         return 'DELETED';

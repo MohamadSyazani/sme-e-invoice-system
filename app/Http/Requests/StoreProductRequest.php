@@ -43,6 +43,9 @@ class StoreProductRequest extends FormRequest
             'retail_selling_price' => ['required', 'numeric', 'decimal:0,2', 'max:99999999.99', 'gte:supplier_cost_price'],
             'stock_quantity' => ['required', 'integer', 'min:0', 'max:1000000'],
             'low_stock_threshold' => ['required', 'integer', 'min:0', 'max:1000000'],
+            // Optional product photo. Saved by the controller, not mass-assigned.
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'], // 5 MB
+            'remove_image' => ['nullable', 'boolean'],
         ];
     }
 
@@ -55,7 +58,19 @@ class StoreProductRequest extends FormRequest
             'sku.regex' => 'The SKU may only contain letters, numbers, dashes and dots (for example HW-CEM-50KG).',
             'sku.unique' => 'Another product already uses this SKU.',
             'retail_selling_price.gte' => 'The retail selling price cannot be lower than the supplier cost price.',
+            'image.max' => 'The photo is too large. Use one smaller than 5 MB.',
+            'image.uploaded' => 'The photo could not be uploaded. It may be larger than this server allows.',
         ];
+    }
+
+    /**
+     * The product columns only (everything validated except the photo fields).
+     *
+     * @return array<string, mixed>
+     */
+    public function productData(): array
+    {
+        return $this->safe()->except(['image', 'remove_image']);
     }
 
     protected function uniqueSkuRule(): mixed
